@@ -12,7 +12,7 @@ import matplotlib.image as mpimg
 # Using the Nvidia architechture as explained in the classroom that it achived best accuracy
 
 model = Sequential() # getting the instance of a model
-model.add(Lambda(lambda x : (x/255)-1 , input_shape=(66,200,3)))    #Normalization layer
+model.add(Lambda(lambda x : (x/255)-1 , input_shape=(160,320,3)))    #Normalization layer
 
 # First convolution layer
 model.add(Conv2D(filters=24,kernel_size=5,strides=(2,2)))
@@ -91,7 +91,7 @@ def generator(data, batch_size=32):
     while 1:
         for batch in range(0,len(data),batch_size): # using a step as batch_size to get data as batches
             bc = data[batch:batch+batch_size]
-            print(bc)
+            #print(bc)
             images = [] # placeholder for images
             steer = [] # placeholder for steering angle    
             for line in bc:
@@ -99,7 +99,7 @@ def generator(data, batch_size=32):
                         
                         #print(line)
                         #name = path+'IMG/'+line[i].split('/')[-1]
-                        print(line)
+                        #print(line)
                         #center_image = cv2.cvtColor(cv2.imread(line[i]), cv2.COLOR_BGR2RGB) 
                         center_image = mpimg.imread(line[i])
                         center_angle = float(line[3]) #getting the steering angle measurement
@@ -135,3 +135,5 @@ def generator(data, batch_size=32):
 train_generator = generator(train_samples, batch_size=32)
 validation_generator = generator(validation_samples, batch_size=32)
 model.fit_generator(train_generator, samples_per_epoch= len(train_samples), validation_data=validation_generator,   nb_val_samples=len(validation_samples), nb_epoch=5, verbose=1)
+
+model.save('model.h5') # saving the model
