@@ -1,10 +1,12 @@
 from keras.models import Sequential, Model
 from keras.layers import Lambda, Dense, Conv2D, BatchNormalization, Activation, Flatten
 import csv
+import sklearn
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
 import numpy as np
 import cv2
+import matplotlib.image as mpimg
 
 # defining the network
 # Using the Nvidia architechture as explained in the classroom that it achived best accuracy
@@ -79,7 +81,7 @@ with open(path+'driving_log.csv') as file:
         if Header:
             Header = False
         else:
-            dataset.append(line[0])
+            dataset.append(line)
 
             
             
@@ -89,6 +91,7 @@ def generator(data, batch_size=32):
     while 1:
         for batch in range(0,len(data),batch_size): # using a step as batch_size to get data as batches
             bc = data[batch:batch+batch_size]
+            print(bc)
             images = [] # placeholder for images
             steer = [] # placeholder for steering angle    
             for line in bc:
@@ -97,7 +100,8 @@ def generator(data, batch_size=32):
                         #print(line)
                         #name = path+'IMG/'+line[i].split('/')[-1]
                         print(line)
-                        center_image = cv2.cvtColor(cv2.imread(line[i]), cv2.COLOR_BGR2RGB) 
+                        #center_image = cv2.cvtColor(cv2.imread(line[i]), cv2.COLOR_BGR2RGB) 
+                        center_image = mpimg.imread(line[i])
                         center_angle = float(line[3]) #getting the steering angle measurement
                         images.append(center_image)
                         
@@ -113,11 +117,11 @@ def generator(data, batch_size=32):
                         # Data augmentation by flipping the image and multiplying the the steering angle with -1
                         images.append(cv2.flip(center_image,1))
                         if(i==0):
-                            angles.append(center_angle*-1)
+                            steer.append(center_angle*-1)
                         elif(i==1):
-                            angles.append((center_angle+correction)*-1)
+                            steer.append((center_angle+correction)*-1)
                         elif(i==2):
-                            angles.append((center_angle-correction)*-1)
+                            steer.append((center_angle-correction)*-1)
                             
                         
             # converting the image data to np arrays
