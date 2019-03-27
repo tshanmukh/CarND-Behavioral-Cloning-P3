@@ -16,7 +16,7 @@ The goals / steps of this project are the following:
 [image3]: ./examples/placeholder_small.png "Recovery Image"
 [image4]: ./examples/placeholder_small.png "Recovery Image"
 [image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
+[image6]: ./examples/placeholder_small.png "	Normal Image"
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
 ---
@@ -50,6 +50,8 @@ The modified version of the Nvidia CNN Arctitecture is used in the code. The ori
 ![Nvidia CNN](cnn-architecture-624x890.png)
 
 The model has BatchNormalizations after each layer and activations are Relu. The final layer is connected to a single node as we are just predicting the streering angle. Dropout layer is added to the first Dense layer inorder to avoid overfitting
+
+A detailed explanation is present in [ End-to-End Deep Learning for Self-Driving Cars ](https://devblogs.nvidia.com/deep-learning-self-driving-cars/)
 
 #### 2. Attempts to reduce overfitting in the model
 
