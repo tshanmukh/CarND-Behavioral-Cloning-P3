@@ -1,92 +1,72 @@
-from keras.models import Sequential, Model
-from keras.layers import Lambda, Dense, Conv2D, BatchNormalization, Activation, Flatten
+#Importing Required libraries to make the model work
+import os
 import csv
-import sklearn
-from sklearn.utils import shuffle
-from sklearn.model_selection import train_test_split
-import numpy as np
-import cv2
-import matplotlib.image as mpimg
+from keras.models import Sequential
+from keras.layers.core import Dense, Flatten, Activation, Dropout
+from keras.layers.convolutional import Convolution2D
+from keras.layers import Lambda, Cropping2D
 
-# defining the network
-# Using the Nvidia architechture as explained in the classroom that it achived best accuracy
+model = Sequential()  # Defining the model
+ 
+model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160,320,3))) # fitst input layer for normalization
 
-model = Sequential() # getting the instance of a model
-model.add(Lambda(lambda x : (x/255)-1 , input_shape=(160,320,3)))    #Normalization layer
+model.add(Cropping2D(cropping=((70,25),(0,0)))) # cropping the unwanted portions in the above and below       
 
-# First convolution layer
-model.add(Conv2D(filters=24,kernel_size=5,strides=(2,2)))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
+model.add(Convolution2D(24,5,5,subsample=(2,2))) # convolution layers
+model.add(Activation('elu'))						# Activation function is used as elu instead for relu
 
-# Second convolution layer
-model.add(Conv2D(filters=36,kernel_size=5,strides=(2,2)))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
+model.add(Convolution2D(36,5,5,subsample=(2,2)))
+model.add(Activation('elu'))
 
-# Third convolution layer
-model.add(Conv2D(filters=48,kernel_size=5,strides=(2,2)))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
+model.add(Convolution2D(48,5,5,subsample=(2,2)))
+model.add(Activation('elu'))
 
-# Fourth Convolution Layer
-model.add(Conv2D(filters=64,kernel_size=3,strides=(1,1)))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
+model.add(Convolution2D(64,3,3))
+model.add(Activation('elu'))
 
-# Fifth Convolution Layer
-model.add(Conv2D(filters=64,kernel_size=3,strides=(1,1)))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
+model.add(Convolution2D(64,3,3))
+model.add(Activation('elu'))
 
-# End of Convolution layers
-# Flatten and fullyconnected layers
+model.add(Flatten())					# Flattening the image for the Fully connected layer
 
-model.add(Flatten()) # Flattening the image here to pass to a fully connected layer
-
-# FC1
 model.add(Dense(100))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
+model.add(Activation('elu'))
 
-#FC2
+model.add(Dropout(0.25))
+
 model.add(Dense(50))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
+model.add(Activation('elu'))
 
-# FC3
+
 model.add(Dense(10))
-model.add(BatchNormalization())
-model.add(Activation('relu'))
+model.add(Activation('elu'))
 
-# Adding an extra layer to predict just one logit
-# FC4
-model.add(Dense(1))                 # As we are predicting only the steering angle we use only one
-model.add(BatchNormalization())
-model.add(Activation('relu'))
-
-# Compiling the model
+model.add(Dense(1)) # As we need only one prediction i.e., steering angle
 
 model.compile(loss='mse',optimizer='adam')
 
 model.summary()
 
-# Reading the data
-path = './dataset/' # adding a variable to path for convinience to switch between different training datas
-dataset = [] # empty list to append the filenames
-with open(path+'driving_log.csv') as file:
-    reader = csv.reader(file)
-    Header = True
-    for line in reader:
-        if Header:
-            Header = False
-        else:
-            dataset.append(line)
+samples = [] 
 
-            
-            
-train_samples, validation_samples = train_test_split(dataset,test_size=0.2)
-# defining the generator
+with open('./data/data/driving_log.csv') as csvfile: # reading the csv file
+    reader = csv.reader(csvfile) 
+    next(reader, None)  # taking out one iter from a iterable to skip the header info
+    for line in reader:
+        samples.append(line)
+
+
+from sklearn.utils import shuffle
+from sklearn.model_selection import train_test_split
+
+train_samples, validation_samples = train_test_split(samples,test_size=0.3)
+
+import cv2
+import numpy as np
+import sklearn
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
 def generator(data, batch_size=32):
     while 1:
         for batch in range(0,len(data),batch_size): # using a step as batch_size to get data as batches
@@ -98,10 +78,10 @@ def generator(data, batch_size=32):
                 for i in range(0,3): #we are taking 3 images, first one is center, second is left and third is right
                         
                         #print(line)
-                        #name = path+'IMG/'+line[i].split('/')[-1]
+                        name = './data/data/IMG/'+line[i].split('/')[-1]
                         #print(line)
                         #center_image = cv2.cvtColor(cv2.imread(line[i]), cv2.COLOR_BGR2RGB) 
-                        center_image = mpimg.imread(line[i])
+                        center_image = mpimg.imread(name)
                         center_angle = float(line[3]) #getting the steering angle measurement
                         images.append(center_image)
                         
@@ -129,11 +109,12 @@ def generator(data, batch_size=32):
             y_train = np.array(steer)
             
             # Adding the yeild instead of the return makes this funtion a generator
-            yield sklearn.utils.shuffle(X_train, y_train)
+            yield sklearn.utils.shuffle(X_train, y_train)          
 
-# Compiling and training the model
-train_generator = generator(train_samples, batch_size=32)
-validation_generator = generator(validation_samples, batch_size=32)
-model.fit_generator(train_generator, samples_per_epoch= len(train_samples), validation_data=validation_generator,   nb_val_samples=len(validation_samples), nb_epoch=5, verbose=1)
+train_generator = generator(train_samples, batch_size=32)			# getting the training images from the generator
+validation_generator = generator(validation_samples, batch_size=32) # getting the validation images from the generator
 
-model.save('model.h5') # saving the model
+
+model.fit_generator(train_generator, samples_per_epoch= len(train_samples)/32, validation_data=validation_generator,   nb_val_samples=len(validation_samples), nb_epoch=5, verbose=1)
+
+model.save('model.h5')
