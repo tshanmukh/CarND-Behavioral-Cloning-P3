@@ -18,20 +18,20 @@ Project includes the following files:
 * writeup.md summarizing the results
 * output_video.mp4 final output video
 
-#### 2. autonomous driving
+#### 2. simulation
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
 ```sh
 python drive.py model.h5
 ```
 
-#### 3. Model
+#### 3. Code is usable and readable
 
-The **model.py** file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+The **model.py** file contains the code for training and saving the convolution neural network. 
+The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
-The **project.py** file is just a little variation in the model which includes a relu activation instead to relu
 
 ### Model Architecture and Training Strategy
-
+---
 #### 1. An appropriate model architecture has been employed
 
 The modified version of the Nvidia CNN Arctitecture is used in the code. The original Architecture is as shown in the image below
@@ -64,7 +64,7 @@ Training data was chosen to keep the vehicle driving on the road. I used a combi
 ![image1](examples/right_2019_03_26_17_43_19_305.jpg)
  
 ### Model Architecture and Training Strategy
-
+---
 #### 1. Solution Design Approach
 
 One can use a Well tested architecture like the Nvidia CNN in the training process and train it with the enough data to learn how to recover from the corners and to drive through the sharp curves
@@ -84,7 +84,7 @@ Data augmentation is done to produce more data for the neural network to learn. 
 
 The training and test data is split as 70% and 30%. The model is trained over 5 epochs and then the model is saved to a file named model.h5
 
-The training with this data produced a validation loss as low as 0.0173
+The training with this data produced a validation loss as low as 0.0175
 
 The car drove pretty well on the normal track but went over the lane line in the corner and recovered fast. To further avoid this reduced the speed parameter to 6 which worked well in the sharp corners
 
